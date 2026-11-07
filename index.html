@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Informly concept: optional warm-up game before a survey</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f4f5f7;--surface:#fff;--ink:#16202e;--muted:#5d6878;--line:#e0e4ea;
+  --accent:#1f4fd8;--accent-ink:#fff;--accent-soft:#e8eefc;--warm:#f2a93b;--ok:#17805a;
+  --shadow:0 1px 2px rgba(22,32,46,.06),0 8px 24px rgba(22,32,46,.06);
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0f1520;--surface:#18202d;--ink:#eef1f6;--muted:#9aa5b5;--line:#2a3445;
+  --accent:#6f93ff;--accent-ink:#0b1220;--accent-soft:#222c45;--warm:#f2b24f;--ok:#4cc79a;--shadow:0 8px 24px rgba(0,0,0,.35);}}
+:root[data-theme="dark"]{--bg:#0f1520;--surface:#18202d;--ink:#eef1f6;--muted:#9aa5b5;--line:#2a3445;--accent:#6f93ff;--accent-ink:#0b1220;--accent-soft:#222c45;--warm:#f2b24f;--ok:#4cc79a;--shadow:0 8px 24px rgba(0,0,0,.35)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 17px/1.55 Figtree,system-ui,-apple-system,"Segoe UI",sans-serif;min-height:100vh}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:3px solid var(--accent);outline-offset:3px;border-radius:10px}
+.bar{display:flex;justify-content:space-between;align-items:center;max-width:760px;margin:0 auto;padding:16px 20px}
+.brand{font-weight:700;font-size:18px;letter-spacing:-.01em}
+.brand small{font-weight:500;color:var(--muted);margin-left:8px;font-size:14px}
+.link{background:none;border:0;color:var(--muted);text-decoration:underline;text-underline-offset:3px;padding:8px;font-size:15px}
+.link:hover{color:var(--ink)}
+main{max-width:760px;margin:0 auto;padding:8px 20px 56px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:24px;box-shadow:var(--shadow);padding:40px 36px;animation:enter .35s ease both}
+@keyframes enter{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+h1{font-size:clamp(28px,5vw,38px);line-height:1.15;letter-spacing:-.025em;margin:0 0 12px;font-weight:700}
+h2{font-size:clamp(22px,4vw,28px);line-height:1.25;letter-spacing:-.02em;margin:0 0 8px;font-weight:700}
+p{margin:0 0 14px;color:var(--muted);max-width:56ch}
+.center{text-align:center}.center p{margin-left:auto;margin-right:auto}
+.btn{border:0;border-radius:999px;padding:14px 26px;font-weight:600;transition:transform .15s,background .15s}
+.btn.primary{background:var(--accent);color:var(--accent-ink)}
+.btn.primary:hover{transform:translateY(-1px)}
+.btn.primary:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.btn.ghost{background:transparent;border:1px solid var(--line);color:var(--ink)}
+.btn.ghost:hover{background:var(--bg)}
+.actions{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-top:24px}
+.center .actions{justify-content:center}
+.fine{font-size:14px;color:var(--muted)}
+/* robot */
+.robot{width:132px;height:132px;display:block;margin:0 auto 18px}
+.robot .bot{animation:bob 3.4s ease-in-out infinite;transform-origin:center}
+.robot .eye{animation:blink 4.5s infinite;transform-origin:center;transform-box:fill-box}
+.robot .arm{transform-origin:112px 84px;animation:wave 2.6s ease-in-out 1}
+.robot.happy .bot{animation:hop .5s ease 2}
+@keyframes bob{50%{transform:translateY(-4px)}}
+@keyframes blink{0%,94%,100%{transform:scaleY(1)}97%{transform:scaleY(.1)}}
+@keyframes wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-28deg)}40%,80%{transform:rotate(-8deg)}}
+@keyframes hop{50%{transform:translateY(-14px)}}
+.speech{display:inline-block;background:var(--accent-soft);color:var(--ink);border-radius:16px;padding:10px 16px;font-weight:500;font-size:16px;margin:0 auto 22px;min-height:44px}
+/* game */
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:6px 0 4px;perspective:900px}
+.pick{aspect-ratio:3/4;background:none;border:0;padding:0;position:relative}
+.pick .in{position:absolute;inset:0;transition:transform .55s cubic-bezier(.3,.7,.2,1);transform-style:preserve-3d}
+.pick.flip .in{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;border-radius:18px;backface-visibility:hidden;-webkit-backface-visibility:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:12px;text-align:center}
+.face.back{background:var(--accent);color:var(--accent-ink);border:1px solid var(--accent)}
+.face.back svg{width:38px;height:38px;opacity:.9}
+.face.front{transform:rotateY(180deg);background:var(--surface);border:2px solid var(--line);font-weight:600;font-size:15px;line-height:1.3;gap:8px}
+.pick.chosen .face.front{border-color:var(--warm);background:color-mix(in srgb,var(--warm) 14%,var(--surface))}
+.face.front svg{width:30px;height:30px}
+.pick:not(.flip):hover .in{transform:translateY(-5px)}
+.pick.dim{opacity:.55}
+.pick:disabled{cursor:default}
+.tag{font-size:12px;color:var(--muted);font-weight:500}
+/* survey */
+.prog{display:flex;align-items:center;gap:12px;margin-bottom:26px}
+.track{flex:1;height:8px;background:var(--line);border-radius:99px;overflow:hidden}
+.fill{height:100%;background:var(--accent);border-radius:99px;transition:width .4s ease}
+.count{font-size:14px;color:var(--muted);font-weight:500;white-space:nowrap}
+.opts{display:grid;gap:10px;margin-top:18px}
+.opt{display:flex;align-items:center;gap:12px;text-align:left;background:var(--surface);border:1.5px solid var(--line);border-radius:14px;padding:14px 16px;transition:border-color .15s,background .15s}
+.opt:hover{border-color:var(--accent)}
+.opt[aria-checked="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.dot{width:20px;height:20px;border-radius:50%;border:2px solid var(--line);flex:none;display:grid;place-items:center}
+.opt.sq .dot{border-radius:6px}
+.opt[aria-checked="true"] .dot{border-color:var(--accent);background:var(--accent)}
+.opt[aria-checked="true"] .dot::after{content:"";width:8px;height:8px;border-radius:50%;background:var(--accent-ink)}
+.opt.sq[aria-checked="true"] .dot::after{border-radius:2px}
+.scale{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:20px}
+.num{border:1.5px solid var(--line);background:var(--surface);border-radius:14px;padding:16px 0;font-weight:600;font-size:20px;transition:all .15s}
+.num:hover{border-color:var(--accent)}
+.num[aria-checked="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);transform:scale(1.04)}
+.ends{display:flex;justify-content:space-between;font-size:14px;color:var(--muted);margin-top:8px}
+textarea{width:100%;min-height:130px;margin-top:18px;border:1.5px solid var(--line);border-radius:14px;padding:14px;font:inherit;background:var(--surface);color:var(--ink);resize:vertical}
+textarea:focus{outline:3px solid var(--accent-soft);border-color:var(--accent)}
+.sum{background:var(--bg);border-radius:16px;padding:6px 18px;margin:22px auto 0;text-align:left;max-width:460px}
+.sum div{display:flex;justify-content:space-between;gap:16px;padding:10px 0;border-bottom:1px solid var(--line);font-size:15px}
+.sum div:last-child{border:0}.sum span:first-child{color:var(--muted)}.sum span:last-child{font-weight:600;text-align:right}
+.check{width:64px;height:64px;border-radius:50%;background:color-mix(in srgb,var(--ok) 16%,transparent);color:var(--ok);display:grid;place-items:center;margin:0 auto 18px}
+dialog{border:1px solid var(--line);border-radius:20px;background:var(--surface);color:var(--ink);max-width:560px;width:calc(100% - 32px);padding:28px;box-shadow:var(--shadow)}
+dialog::backdrop{background:rgba(10,16,26,.5)}
+dialog h2{font-size:22px}dialog h3{font-size:16px;margin:18px 0 4px}dialog ul{margin:0;padding-left:20px;color:var(--muted)}dialog li{margin-bottom:4px}
+.sr{position:absolute;left:-9999px}
+.score{display:flex;justify-content:center;align-items:center;gap:18px;font-weight:600;margin-bottom:10px}.score b{font-size:20px}
+.rd{display:inline-flex;gap:6px}.rd i{width:12px;height:12px;border-radius:50%;border:2px solid var(--line)}.rd i.w{background:var(--ok);border-color:var(--ok)}.rd i.l{background:var(--warm);border-color:var(--warm)}
+.pips{display:inline-flex;gap:4px;margin-right:8px;vertical-align:middle}.pips i{width:10px;height:10px;border-radius:3px;border:2px solid var(--line);transition:all .3s}.pips i.on{background:var(--ok);border-color:var(--ok)}
+.vault{width:112px;height:112px;display:block;margin:0 auto 18px}.vault .dial{transform-origin:60px 60px;animation:spin 1.2s ease-out both}.vault .lamp{animation:lamp .4s ease 1.1s both}
+@keyframes spin{from{transform:rotate(-360deg)}to{transform:none}}@keyframes lamp{from{opacity:0;transform:scale(.3)}to{opacity:1}}
+.chip{display:inline-flex;align-items:center;gap:10px;background:var(--accent-soft);border-radius:14px;padding:8px 14px;font-size:15px;font-weight:500;margin-bottom:16px;animation:enter .35s ease both}
+.chip svg{width:20px;height:20px;flex:none;color:var(--accent)}
+@media(max-width:520px){.card{padding:28px 20px;border-radius:20px}.cards{gap:10px}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<header class="bar">
+  <div class="brand">Informly<small>Concept prototype</small></div>
+  <button class="link" id="about">About this prototype</button>
+</header>
+<main><div id="app" aria-live="polite"></div></main>
+
+<dialog id="dlg" aria-labelledby="dlgT">
+  <h2 id="dlgT">About this prototype</h2>
+  <p>An independent product concept, not an existing Informly feature. It shows how a short, optional, topic-related mini-game could introduce a survey.</p>
+  <h3>Problem explored</h3>
+  <p>People often skip surveys because they feel repetitive or dull. Could a brief, skippable warm-up make the start feel friendlier?</p>
+  <h3>Journey</h3>
+  <ul><li>Welcome: play a game or skip straight to the survey</li><li>Game: best of three rounds, picking one of three cards each time (about 15 seconds). Two are open, one is locked. Win or lose, the survey is identical. Only the wording changes.</li><li>Survey: each answer opens a lock on Bo’s vault. A small, purely fun surprise waits at the end.</li><li>Transition, then a 5-question survey, then thanks</li></ul>
+  <h3>To test with real participants</h3>
+  <ul><li>Completion and drop-off versus a standard intro (A/B)</li><li>Whether the game feels like a barrier, and how many skip</li><li>Effect on answer quality or bias, including whether the “forfeit” framing or vault progress feels pushy or manipulative</li><li>Whether losing feels playful rather than punishing, and which win/lose odds feel fair</li><li>Time added, accessibility, and fit across topics and audiences</li></ul>
+  <p class="fine" style="margin-top:14px">No claim is made that this improves engagement. That needs experimental evidence. Answers stay in your browser tab and are not sent anywhere.</p>
+  <div class="actions"><button class="btn primary" id="closeDlg">Close</button></div>
+</dialog>
+
+<script>
+const ROBOT=(cls='')=>`<svg class="robot ${cls}" viewBox="0 0 140 140" role="img" aria-label="Friendly robot named Bo">
+<g class="bot">
+<line x1="70" y1="14" x2="70" y2="28" stroke="var(--ink)" stroke-width="4" stroke-linecap="round"/><circle cx="70" cy="12" r="6" fill="var(--warm)"/>
+<rect x="30" y="28" width="80" height="62" rx="22" fill="var(--accent)"/>
+<rect x="40" y="40" width="60" height="36" rx="14" fill="var(--surface)"/>
+<ellipse class="eye" cx="56" cy="58" rx="6" ry="7" fill="var(--ink)"/><ellipse class="eye" cx="84" cy="58" rx="6" ry="7" fill="var(--ink)"/>
+<path d="M60 68q10 7 20 0" stroke="var(--ink)" stroke-width="3" fill="none" stroke-linecap="round"/>
+<rect x="42" y="94" width="56" height="34" rx="14" fill="var(--accent)"/><circle cx="70" cy="111" r="6" fill="var(--warm)"/>
+<rect x="20" y="98" width="14" height="24" rx="7" fill="var(--accent)"/>
+<g class="arm"><rect x="106" y="84" width="14" height="28" rx="7" fill="var(--accent)"/></g>
+</g></svg>`;
+const ICON={
+ star:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M12 3l2.7 5.6 6.1.8-4.5 4.2 1.1 6-5.4-2.9-5.4 2.9 1.1-6L3.2 9.4l6.1-.8z"/></svg>',
+ bell:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 17V11a6 6 0 1112 0v6l1.5 2h-15zM10 21h4"/></svg>',
+ coin:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v10M9.5 9.5c0-1 1-1.8 2.5-1.8s2.500.8 2.500 1.800-1 1.500-2.500 1.900-2.500.9-2.500 1.900 1 1.800 2.500 1.800 2.500-.8 2.500-1.800"/></svg>',
+ q:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 9a3 3 0 116 0c0 2-3 2.500-3 5M12 18h.01"/></svg>',
+ ok:'<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.500" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.500l4.500 4.500L19 7.500"/></svg>'};
+const PRIZES=[
+ {i:'ok',t:'Vault open',w:1,r:'Vault open! You beat me this round. Sharp instincts.'},
+ {i:'ok',t:'Vault open',w:1,r:'Open! You got me. Well played.'},
+ {i:'lock',t:'Locked. Bo keeps this one',w:0,r:'Locked! Round to me. Time for your forfeit…'}];
+ICON.lock='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 118 0v3"/></svg>';
+const QS=[
+ {k:'freq',type:'single',q:'How do you usually manage your everyday banking?',o:['Mobile app','Website','Branch or in person','Phone','A mix of these']},
+ {k:'ease',type:'rating',q:'How easy is it to do what you need in your bank’s app or website?',lo:'Very difficult',hi:'Very easy'},
+ {k:'use',type:'multi',q:'Which of these have you done in the last 3 months? Select all that apply.',o:['Checked a balance','Paid a bill','Sent money to someone','Contacted customer support','None of these']},
+ {k:'help',type:'rating',q:'If you needed help, how satisfied were you with getting it?',lo:'Very dissatisfied',hi:'Very satisfied',na:true},
+ {k:'open',type:'text',q:'Is there anything we could do to improve your banking experience?',opt:true}];
+const S={screen:'welcome',i:0,ans:{},picked:null};
+const $=s=>document.querySelector(s),app=$('#app');
+function go(s){S.screen=s;render();window.scrollTo({top:0,behavior:'smooth'});app.querySelector('h1,h2')?.setAttribute('tabindex','-1');app.querySelector('h1,h2')?.focus({preventScroll:true})}
+function render(){({welcome,game,transition,survey,done}[S.screen])()}
+
+function welcome(){
+ app.innerHTML=`<section class="card center">${ROBOT()}
+ <h1>Your banking experience matters.<br>But first, a little challenge!</h1>
+ <p>Meet Bo. Beat him in three quick rounds by finding the open vault among three cards. It takes about 15 seconds and is completely optional. Win or lose, the survey is the same: 5 short questions, and each answer opens a lock on Bo’s vault.</p>
+ <div class="actions"><button class="btn primary" id="play">Play a quick game</button><button class="btn ghost" id="skip">Skip and start survey</button></div>
+ <p class="fine" style="margin:18px auto 0">The survey takes about 2 minutes. Your answers are the same either way.</p></section>`;
+ $('#play').onclick=()=>{S.picked=null;go('game')};$('#skip').onclick=startSurvey;}
+
+function scoreHTML(){return `<span>You <b>${S.you}</b></span><span class="rd" aria-hidden="true">${[0,1,2].map(n=>`<i class="${S.hist[n]===undefined?'':S.hist[n]?'w':'l'}"></i>`).join('')}</span><span>Bo <b>${S.bo}</b></span>`}
+const WINL=['Open! Point to you.','Nice one. You found it.','Sharp. That’s another point.'];
+const LOSEL=['Locked! Point to me.','Ha, you hit the lock.','Locked again. Bo scores.'];
+function game(){
+ S.round=0;S.you=0;S.bo=0;S.hist=[];S.picked=null;
+ const deal=()=>{
+  const lock=Math.floor(Math.random()*3),last=S.round===2;
+  app.innerHTML=`<section class="card center">
+  <div class="score" aria-live="polite">${scoreHTML()}</div>
+  ${ROBOT()}
+  <div class="speech" id="say">${S.round===0?'I locked one vault. Find an open one to score.':'Round '+(S.round+1)+' of 3. I moved the lock.'}</div>
+  <div class="cards" role="group" aria-label="Three face-down cards">${[0,1,2].map(n=>`<button class="pick" data-l="${n===lock?1:0}" aria-label="Card ${n+1}, face down"><div class="in">
+   <div class="face back">${ICON.q}</div>
+   <div class="face front">${ICON[n===lock?'lock':'ok']}<span>${n===lock?'Locked':'Open'}</span></div></div></button>`).join('')}</div>
+  <p class="fine" style="margin:14px auto 0">Best of three. Just for fun: win or lose, the survey is the same.</p>
+  <div class="actions"><button class="btn primary" id="cont" hidden>${last?'See result':'Next round'}</button><button class="btn ghost" id="skip2">Skip game</button></div></section>`;
+  const picks=[...app.querySelectorAll('.pick')];
+  picks.forEach(b=>b.onclick=()=>{
+   picks.forEach(x=>{x.disabled=true;x.classList.add('flip');if(x!==b)x.classList.add('dim')});
+   b.classList.add('chosen');b.classList.remove('dim');
+   const lost=b.dataset.l==='1';
+   if(lost)S.bo++;else S.you++;
+   S.hist.push(!lost);
+   $('#say').textContent=(lost?LOSEL:WINL)[S.round];
+   $('.score').innerHTML=scoreHTML();
+   $('.robot').classList.add('happy');
+   b.setAttribute('aria-label',lost?'Locked vault':'Open vault');
+   const c=$('#cont');c.hidden=false;c.focus();
+  });
+  $('#cont').onclick=()=>{if(last){S.picked=S.you>=2?0:2;go('transition')}else{S.round++;deal()}};
+  $('#skip2').onclick=startSurvey;
+ };
+ deal();}
+
+function transition(){
+ app.innerHTML=`<section class="card center">${ROBOT('happy')}
+ <h2>${PRIZES[S.picked].w?'Nice work! Now we’d love to hear about your banking experience.':'Round to Bo! Your forfeit: tell us about your banking experience.'}</h2>
+ <p>${PRIZES[S.picked].w?'Sharp instincts like yours are exactly what we need. ':'Don’t worry, this forfeit is gentle. '}Five short questions. You can go back to change an answer, and the last question is optional.</p>
+ <div class="chip" style="margin:6px 0 0">${ICON.lock}<span>Score: You ${S.you}, Bo ${S.bo}. Each answer opens one lock on Bo’s vault.</span></div><div class="actions"><button class="btn primary" id="st">Start survey</button></div></section>`;
+ $('#st').onclick=startSurvey;}
+
+function startSurvey(){S.i=0;S.ans={};
+ S.order=QS.map((_,n)=>n);
+ go('survey')}
+
+function survey(){
+ const q=QS[S.order[S.i]],a=S.ans[q.k],total=QS.length,pct=Math.round(S.i/total*100);
+ let body='';
+ if(q.type==='single'||q.type==='multi'){
+  const m=q.type==='multi';
+  body=`<div class="opts" role="${m?'group':'radiogroup'}" aria-label="${q.q}">${q.o.map(o=>{
+   const on=m?(a||[]).includes(o):a===o;
+   return `<button class="opt ${m?'sq':''}" role="${m?'checkbox':'radio'}" aria-checked="${on}" data-v="${o}"><span class="dot"></span>${o}</button>`}).join('')}</div>`;
+ }else if(q.type==='rating'){
+  body=`<div class="scale" role="radiogroup" aria-label="${q.q}">${[1,2,3,4,5].map(n=>`<button class="num" role="radio" aria-checked="${a===n}" data-v="${n}" aria-label="${n} of 5">${n}</button>`).join('')}</div>
+  <div class="ends"><span>1 · ${q.lo}</span><span>5 · ${q.hi}</span></div>
+  ${q.na?`<div class="actions"><button class="link" id="na" style="padding-left:0">${a==='N/A'?'✓ ':''}I didn’t need help</button></div>`:''}`;
+ }else body=`<label class="sr" for="ta">${q.q}</label><textarea id="ta" placeholder="Optional. Share as much or as little as you like.">${a||''}</textarea>`;
+ const last=S.i===total-1;
+ app.innerHTML=`<section class="card">
+ <div class="prog"><div class="track" role="progressbar" aria-valuemin="0" aria-valuemax="${total}" aria-valuenow="${S.i}" aria-label="Survey progress"><div class="fill" style="width:${pct}%"></div></div><span class="count"><span class="pips" role="img" aria-label="Vault locks opened: ${S.i} of ${total}">${QS.map((_,n)=>`<i class="${n<S.i?'on':''}"></i>`).join('')}</span>${S.i+1} of ${total}</span></div>
+ ${S.i===0&&S.picked!=null?`<div class="chip">${ICON[PRIZES[S.picked].i]}<span>${PRIZES[S.picked].w?'Bo: Your instincts were right. Let’s see what you think.':'Bo: Forfeit time, but it’s a gentle one.'}</span></div>`:''}
+ <h2>${q.q}${q.opt?' <span class="fine" style="font-weight:500">(optional)</span>':''}</h2>${body}
+ <div class="actions"><button class="btn ghost" id="back" ${S.i?'':'hidden'}>Back</button>
+ <button class="btn primary" id="next">${last?'Submit survey':'Next'}</button></div></section>`;
+ const next=$('#next');next.disabled=!q.opt&&!has(q,S.ans[q.k]);
+ const refresh=()=>{next.disabled=!q.opt&&!has(q,S.ans[q.k])};
+ app.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{
+  const v=b.dataset.v;
+  if(q.type==='single')S.ans[q.k]=v;
+  else{let c=S.ans[q.k]||[];
+   if(v==='None of these')c=c.includes(v)?[]:[v];
+   else{c=c.filter(x=>x!=='None of these');c=c.includes(v)?c.filter(x=>x!==v):[...c,v]}
+   S.ans[q.k]=c}
+  const val=S.ans[q.k];
+  app.querySelectorAll('.opt').forEach(x=>x.setAttribute('aria-checked',q.type==='single'?val===x.dataset.v:(val||[]).includes(x.dataset.v)));
+  refresh();});
+ app.querySelectorAll('.num').forEach(b=>b.onclick=()=>{S.ans[q.k]=+b.dataset.v;
+  app.querySelectorAll('.num').forEach(x=>x.setAttribute('aria-checked',x===b));
+  const n=$('#na');if(n)n.textContent='I didn’t need help';refresh();});
+ $('#na')&&($('#na').onclick=()=>{S.ans[q.k]='N/A';app.querySelectorAll('.num').forEach(x=>x.setAttribute('aria-checked','false'));$('#na').textContent='✓ I didn’t need help';refresh();});
+ $('#ta')&&($('#ta').oninput=e=>{S.ans[q.k]=e.target.value});
+ $('#back').onclick=()=>{S.i--;survey()};
+ next.onclick=()=>{if(last)go('done');else{S.i++;survey()}};}
+
+function has(q,v){return q.type==='multi'?(v||[]).length>0:v!==undefined&&v!==''}
+
+function done(){
+ const A=S.ans,rows=[['Everyday banking',A.freq],['Ease of use',A.ease+' of 5'],['Recent activity',(A.use||[]).join(', ')],['Getting help',A.help==='N/A'?'Didn’t need help':A.help+' of 5']];
+ app.innerHTML=`<section class="card center"><svg class="vault" viewBox="0 0 120 120" role="img" aria-label="Vault door, now open"><circle cx="60" cy="60" r="52" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="4"/><g class="dial"><circle cx="60" cy="60" r="26" fill="var(--surface)" stroke="var(--accent)" stroke-width="4"/><path d="M60 38v14M60 68v14M38 60h14M68 60h14" stroke="var(--accent)" stroke-width="4" stroke-linecap="round"/></g><circle class="lamp" cx="60" cy="14" r="6" fill="var(--ok)"/></svg>
+ <h1>Thank you! The vault is open.</h1><p>Your feedback has been recorded for this demo. It helps make banking clearer and simpler for everyone.</p>
+ <div class="chip" style="margin:0">${ICON.lock}<span>Inside: the first cash machine went live in London in 1967.</span></div>
+ <div class="sum" aria-label="Your answers (demo only)">${rows.map(r=>`<div><span>${r[0]}</span><span>${r[1]}</span></div>`).join('')}</div>
+ <p class="fine" style="margin:12px auto 0">Answers are held in this tab only and aren’t sent anywhere.</p>
+ <div class="actions"><button class="btn primary" id="again">Restart demo</button></div></section>`;
+ $('#again').onclick=()=>{S.ans={};S.i=0;S.picked=null;go('welcome')};}
+
+const dlg=$('#dlg');$('#about').onclick=()=>dlg.showModal();$('#closeDlg').onclick=()=>dlg.close();
+dlg.addEventListener('click',e=>{if(e.target===dlg)dlg.close()});
+render();
+</script>
+</body>
+</html>
